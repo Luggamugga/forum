@@ -9,6 +9,6 @@ class PageController extends AbstractController
 {
     #[Route('/')]
     public function page(): Response {
-        return new Response("<html><body>asdf</body></html>");
+        return $this->render("home.html.twig");
     }
 }
