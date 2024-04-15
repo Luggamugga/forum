@@ -13,18 +13,5 @@ class PageController extends AbstractController
     public function renderHome(): Response {
         return $this->render("home.html.twig");
     }
-    #[Route('/{slug}',name: "nav")]
-    public function page(string $slug): Response {
-        if($slug=="home"){
-            return new Response("<html><body>asdaf</body></html>");
-        }
-        if($slug=="asdf"){
-            return new Response("a");
-        }
-        if($slug==""){
-            return $this->render("home.html.twig");
-        }
-        return new Response("asdf");
-    }
 
 }
