@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ThreadCommentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
@@ -26,8 +27,8 @@ class ThreadComment
     #[ORM\Column]
     private ?int $threadId = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable:true)]
+    private ?\DateTimeInterface $created_at = null;
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void

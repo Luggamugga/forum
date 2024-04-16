@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -26,6 +27,8 @@ class ThreadController extends AbstractController
     #[Route("/new-thread")]
     function newThread(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $error = false;
+        $session = $request->getSession();
         $thread = new Threads();
         $form = $this->createFormBuilder($thread)
             ->add("name", TextType::class)
@@ -34,21 +37,25 @@ class ThreadController extends AbstractController
             ->getForm();
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $session->get("username")) {
             $data = $form->getData();
             $entityManager->getRepository(Threads::class);
             $entityManager->persist($thread);
             $entityManager->flush();
 
             return $this->redirectToRoute("App\Controller\ThreadController::renderThread", array("id" => $thread->getId()));
+        }              else {
+            $error = true;
         }
 
-        return $this->render("new-thread.html.twig", ["form" => $form]);
+
+
+        return $this->render("new-thread.html.twig", ["form" => $form,"error"=>$error]);
     }
 
 
     #[Route("/Threads/{id}")]
-    function renderThread(int $id, EntityManagerInterface $entityManager): Response
+    function renderThread(int $id, EntityManagerInterface $entityManager,Request $request): Response
     {
         $thread = $entityManager->getRepository(Threads::class)->find($id);
         if (!$thread) {
@@ -59,13 +66,44 @@ class ThreadController extends AbstractController
         $threadCreated = $thread->getCreatedAt()->format("d-m-Y H:i:s");
 
         $threadComment = new ThreadComment();
-        $newCommentForm = $this->createFormBuilder($threadComment);
+        $session = $request->getSession();
 
-        return $this->render("thread.html.twig",["title"=>$threadTitle,"desc"=>$threadDesc,"created"=>$threadCreated]);
+
+        $newCommentForm = $this->createFormBuilder($threadComment)
+            ->add("text",TextType::class)
+            ->add("Post",SubmitType::class,["label"=>"Post"])
+            ->getForm();
+
+        $threadComment->setByUsername($session->get("username"));
+        $threadComment->setThreadId($id);
+        $newCommentForm->handleRequest($request);
+
+        if($newCommentForm->isSubmitted() && $newCommentForm->isValid() ){
+            $data = $newCommentForm->getData();
+
+            $entityManager->getRepository(ThreadComment::class);
+            $entityManager->persist($threadComment);
+            $entityManager->flush();
+        }
+        $rsm = new ResultSetMappingBuilder($entityManager);
+        $rsm->addRootEntityFromClassMetadata("App\Entity\ThreadComment","t");
+        $query = $entityManager->createNativeQuery("SELECT * FROM thread_comment t WHERE t.thread_id=".$id,$rsm);
+        $data = $query->getArrayResult();
+        
+
+
+
+
+
+        return $this->render("thread.html.twig",["newComment"=>$newCommentForm,"title"=>$threadTitle,"desc"=>$threadDesc,"created"=>$threadCreated,"threadComments"=>$data]);
     }
 
-   # function addComment($text): Response{
+   #function addComment(EntityManagerInterface $entityManager): Response{
+    #    $threads = $entityManager->getRepository(threads::class);
+   #     $threads->
 
-    #}
+
+
+  # }
 
 }

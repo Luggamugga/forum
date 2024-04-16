@@ -9,6 +9,19 @@
 {{ desc }}
 <br>
 {{ created }}
+<br>
+<div class="new-comment-form-wrapper">
+    {{ form_start(newComment) }}
+    {{ form_widget(newComment) }}
+    {{ form_end(newComment) }}
+</div>
+<ul>
+    {% for comments in threadComments %}
+
+        <li><div>By User {{ comments["byUsername"] }}: </div><div>{{comments["text"]  }}</div></li>
+
+    {% endfor %}
+</ul>
 
 </body>
 </html>

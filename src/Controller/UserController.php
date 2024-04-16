@@ -12,7 +12,7 @@ class UserController extends AbstractController
     function generateRandomUsername(): string{
         $usrname = "";
         $chars = ["a","b","c","d","e","f","g","h","i",""];
-        $chars = "qwertzuiopasdfghjklyxcvbnmQWERTZUIOASDFGHJKLYXCVBNM1234567890!$%&*";
+        $chars = "qwertzuiopasdfghjklyxcvbnmQWERTZUIOASDFGHJKLYXCVBNM1234567890!";
         $randomNum = rand(8,20);
         for ($i = 0;$i<$randomNum;$i++){
 

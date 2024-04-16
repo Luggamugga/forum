@@ -26,6 +26,9 @@ class Threads
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable:true)]
     private ?\DateTimeInterface $created_at = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $user_comments_json = null;
+
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -77,6 +80,18 @@ class Threads
     public function setCreatedAt(\DateTimeInterface $created_at): static
     {
         $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUserCommentsJson(): ?array
+    {
+        return $this->user_comments_json;
+    }
+
+    public function setUserCommentsJson(?array $user_comments_json): static
+    {
+        $this->user_comments_json = $user_comments_json;
 
         return $this;
     }
