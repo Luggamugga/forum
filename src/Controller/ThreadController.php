@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ThreadComment;
 use App\Entity\Threads;
 use Doctrine\DBAL\Types\DateTimeType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use function MongoDB\BSON\toJSON;
 
 #[HasLifecycleCallbacks]
 class ThreadController extends AbstractController
@@ -57,6 +57,9 @@ class ThreadController extends AbstractController
         $threadTitle = $thread->getName();
         $threadDesc = $thread->getDescription();
         $threadCreated = $thread->getCreatedAt()->format("d-m-Y H:i:s");
+
+        $threadComment = new ThreadComment();
+        $newCommentForm = $this->createFormBuilder($threadComment);
 
         return $this->render("thread.html.twig",["title"=>$threadTitle,"desc"=>$threadDesc,"created"=>$threadCreated]);
     }

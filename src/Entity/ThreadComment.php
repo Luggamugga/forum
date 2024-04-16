@@ -4,6 +4,10 @@ namespace App\Entity;
 
 use App\Repository\ThreadCommentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+
+#[HasLifecycleCallbacks]
+
 
 #[ORM\Entity(repositoryClass: ThreadCommentRepository::class)]
 class ThreadComment
@@ -22,6 +26,14 @@ class ThreadComment
     #[ORM\Column]
     private ?int $threadId = null;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
     public function getId(): ?int
     {
         return $this->id;
@@ -66,6 +78,18 @@ class ThreadComment
     public function setThreadId(int $threadId): static
     {
         $this->threadId = $threadId;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
 
         return $this;
     }
