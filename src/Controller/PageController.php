@@ -13,8 +13,19 @@ class PageController extends AbstractController
     #[Route('/',name:"home")]
     public function renderHome(Request $request): Response {
         $session = $request->getSession();
-        $usrname = $session->get("username");
+
+        if($session->get("username")){
+            $usrname = $session->get("username");
+        } else {
+            $usrname = "not logged in";
+        }
         return $this->render("home.html.twig",["username"=>$usrname]);
+    }
+
+    public function renderNavBar(): Response{
+
+        return $this->render("NavBar.html.twig");
+
     }
 
 }

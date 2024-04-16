@@ -1,9 +1,4 @@
-<!DOCTPYE html>
-<html>
-    <head>
-
-    </head>
-<body>
+{{render(controller("App\\Controller\\PageController::renderNavBar")) }}
 {{ title }}
 <br>
 {{ desc }}
@@ -11,9 +6,13 @@
 {{ created }}
 <br>
 <div class="new-comment-form-wrapper">
+    {% if user_logged_in%}
     {{ form_start(newComment) }}
     {{ form_widget(newComment) }}
     {{ form_end(newComment) }}
+    {% else %}
+    <div class="error">Create User to post here <a href="/new-temporary-user">Create User</a></div>
+    {% endif %}
 </div>
 <ul>
     {% for comments in threadComments %}

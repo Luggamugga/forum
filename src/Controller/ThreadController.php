@@ -37,16 +37,17 @@ class ThreadController extends AbstractController
             ->getForm();
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid() && $session->get("username")) {
+        if ($form->isSubmitted() && $form->isValid() && $session->get("username")){
             $data = $form->getData();
             $entityManager->getRepository(Threads::class);
             $entityManager->persist($thread);
             $entityManager->flush();
 
             return $this->redirectToRoute("App\Controller\ThreadController::renderThread", array("id" => $thread->getId()));
-        }              else {
-            $error = true;
         }
+         if(!$session->get("username")){
+             $error = true;
+         }
 
 
 
@@ -57,6 +58,10 @@ class ThreadController extends AbstractController
     #[Route("/Threads/{id}")]
     function renderThread(int $id, EntityManagerInterface $entityManager,Request $request): Response
     {
+        //check if session existst (if user is logged in)
+        $userLoggedIn = $request->get("username");
+
+        //get thread from db
         $thread = $entityManager->getRepository(Threads::class)->find($id);
         if (!$thread) {
             throw $this->createNotFoundException("No thread found with id: " . $id);
@@ -65,38 +70,39 @@ class ThreadController extends AbstractController
         $threadDesc = $thread->getDescription();
         $threadCreated = $thread->getCreatedAt()->format("d-m-Y H:i:s");
 
-        $threadComment = new ThreadComment();
-        $session = $request->getSession();
+        //new comment handling
+        if($userLoggedIn) {
+            $threadComment = new ThreadComment();
+            $session = $request->getSession();
 
+            $newCommentForm = $this->createFormBuilder($threadComment)
+                ->add("text", TextType::class)
+                ->add("Post", SubmitType::class, ["label" => "Post"])
+                ->getForm();
 
-        $newCommentForm = $this->createFormBuilder($threadComment)
-            ->add("text",TextType::class)
-            ->add("Post",SubmitType::class,["label"=>"Post"])
-            ->getForm();
+            $threadComment->setByUsername($session->get("username"));
+            $threadComment->setThreadId($id);
+            $newCommentForm->handleRequest($request);
 
-        $threadComment->setByUsername($session->get("username"));
-        $threadComment->setThreadId($id);
-        $newCommentForm->handleRequest($request);
+            if ($newCommentForm->isSubmitted() && $newCommentForm->isValid()) {
+                $data = $newCommentForm->getData();
 
-        if($newCommentForm->isSubmitted() && $newCommentForm->isValid() ){
-            $data = $newCommentForm->getData();
-
-            $entityManager->getRepository(ThreadComment::class);
-            $entityManager->persist($threadComment);
-            $entityManager->flush();
+                $entityManager->getRepository(ThreadComment::class);
+                $entityManager->persist($threadComment);
+                $entityManager->flush();
+            }
         }
+
+        //rendering Comments:
         $rsm = new ResultSetMappingBuilder($entityManager);
         $rsm->addRootEntityFromClassMetadata("App\Entity\ThreadComment","t");
         $query = $entityManager->createNativeQuery("SELECT * FROM thread_comment t WHERE t.thread_id=".$id,$rsm);
         $data = $query->getArrayResult();
-        
 
 
-
-
-
-        return $this->render("thread.html.twig",["newComment"=>$newCommentForm,"title"=>$threadTitle,"desc"=>$threadDesc,"created"=>$threadCreated,"threadComments"=>$data]);
+        return $this->render("thread.html.twig",["newComment"=>$newCommentForm ?? "","title"=>$threadTitle,"desc"=>$threadDesc,"created"=>$threadCreated,"threadComments"=>$data,"user_logged_in"=>$userLoggedIn]);
     }
+
 
    #function addComment(EntityManagerInterface $entityManager): Response{
     #    $threads = $entityManager->getRepository(threads::class);
