@@ -1,0 +1,46 @@
+body {
+    background-color: #B3CEE5;
+}
+
+ul{
+    width:80%;
+    list-style-type: none;
+    padding: auto;
+    margin: auto;
+}
+
+.logo{
+    text-align: center;
+    margin-bottom: -10px;
+    padding-top: 10px;
+}
+
+.navbar{
+    display: grid;
+}
+
+li{
+    float:left;
+}
+
+li a{
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 2em;
+}
+
+.main{
+    width:80%;
+    margin: 0 auto;
+
+}
+
+.section{
+    width:100%;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 2px solid #333;
+}
